@@ -30,7 +30,7 @@ mainNav?.querySelectorAll('a').forEach(a => {
   });
 });
 
-// ─── Efeito Active Nav Link Correto no Scroll ──────────────────────
+// ─── CONSERTO: Efeito Active Nav Link Correto no Scroll ──────────────────────
 const navLinks = document.querySelectorAll('.main-nav a');
 const sectionObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
@@ -43,7 +43,7 @@ const sectionObs = new IntersectionObserver(entries => {
 
 document.querySelectorAll('section[id]').forEach(s => sectionObs.observe(s));
 
-// ─── Animação Reveal on Scroll Limpa ───────────────────────────────
+// ─── CONSERTO: Animação Reveal on Scroll Limpa ───────────────────────────────
 const revObs = new IntersectionObserver((entries, obs) => {
   entries.forEach(e => { 
     if (e.isIntersecting) { 
@@ -174,24 +174,9 @@ function closeModal() {
 document.getElementById('closeModal')?.addEventListener('click', closeModal);
 document.getElementById('modalOverlay')?.addEventListener('click', closeModal);
 
-// ─── MUDANÇA AQUI: Formulário de Contato integrado ao WhatsApp ────────────────
+// ─── Formulário de Contato ────────────────────────────────────────────────────
 document.getElementById('contactForm')?.addEventListener('submit', e => {
   e.preventDefault();
-
-  // 1. Captura as mensagens reais digitadas pelo usuário nas caixinhas do site
-  const name = document.getElementById('cName').value.trim();
-  const email = document.getElementById('cEmail').value.trim();
-  const phone = document.getElementById('cPhone').value.trim();
-  const msg = document.getElementById('cMsg').value.trim();
-
-  // 2. Agrupa tudo em um texto organizado com quebras de linha
-  const waText = `*Novo Contato - daEnê*\n\n*Nome:* ${name}\n*E-mail:* ${email}\n*Telefone:* ${phone}\n*Mensagem:* ${msg}`;
-  const encodedText = encodeURIComponent(waText);
-
-  // 3. Redireciona o usuário para o seu número com o texto exato que ele digitou
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`, '_blank');
-
-  // 4. Mostra o alerta verde de sucesso na tela e limpa os campos do formulário
   const successEl = document.getElementById('formSuccess');
   if (successEl) {
     successEl.style.display = 'block';
@@ -218,6 +203,7 @@ document.getElementById('adminTrigger')?.addEventListener('click', openAdmin);
 document.getElementById('closeAdmin')?.addEventListener('click', closeAdmin);
 document.getElementById('adminOverlay')?.addEventListener('click', closeAdmin);
 
+// MODIFICAÇÃO: Renderiza foto real da bolsa na lista administrativa se houver link
 function renderAdminList() {
   const container = document.getElementById('adminProductList');
   if (!container || typeof DB === 'undefined') return;
