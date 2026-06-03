@@ -1,5 +1,5 @@
 /**
- * daEnê — Script Principal Conectado ao WhatsApp e Protegido por Senha
+ * daEnê — Script Principal
  */
 
 // ─── Configuração Compartilhada do WhatsApp ──────────────────────────────────
@@ -130,4 +130,173 @@ function openModal(id) {
   if (!p) return;
 
   const imgContent = p.img
-    ? `<img src="${p.img}" alt="${p.name}" style="width:100%; border-radius:16px; margin-bottom:
+    ? `<img src="${p.img}" alt="${p.name}" style="width:100%; border-radius:16px; margin-bottom:1.5rem; aspect-ratio:1; object-fit:cover;">`
+    : `<div class="modal-emoji">${p.emoji || '👜'}</div>`;
+
+  const stockText = { 
+    disponivel: 'Disponível em estoque', 
+    encomenda: 'Disponível sob encomenda (prazo a combinar)', 
+    esgotado: 'Temporariamente esgotado' 
+  }[p.stock];
+
+  const modalBody = document.getElementById('modalBody');
+  if (!modalBody) return;
+
+  modalBody.innerHTML = `
+    ${imgContent}
+    <div class="modal-cat">${p.category}</div>
+    <h2>${p.name}</h2>
+    <p class="modal-desc">${p.description || p.short}</p>
+    <div class="modal-meta">
+      <span class="modal-stock">${stockText}</span>
+    </div>
+    <div class="modal-price">${DB.formatPrice(p.price)}</div>
+    <div class="modal-actions">
+      ${p.stock !== 'esgotado'
+        ? `<button class="btn-primary" onclick="Cart.add('${p.id}'); closeModal()">🛒 Adicionar ao Carrinho</button>`
+        : ''
+      }
+      <a class="btn-outline" href="https://wa.me/${WHATSAPP_NUMBER}?text=Olá!+Tenho+interesse+na+peça:+${encodeURIComponent(p.name)}" target="_blank">💬 Perguntar no WhatsApp</a>
+    </div>
+  `;
+
+  document.getElementById('productModal')?.classList.add('open');
+  document.getElementById('modalOverlay')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('productModal')?.classList.remove('open');
+  document.getElementById('modalOverlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('closeModal')?.addEventListener('click', closeModal);
+document.getElementById('modalOverlay')?.addEventListener('click', closeModal);
+
+// ─── MUDANÇA AQUI: Formulário de Contato integrado ao WhatsApp ────────────────
+document.getElementById('contactForm')?.addEventListener('submit', e => {
+  e.preventDefault();
+
+  // 1. Captura as mensagens reais digitadas pelo usuário nas caixinhas do site
+  const name = document.getElementById('cName').value.trim();
+  const email = document.getElementById('cEmail').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  const msg = document.getElementById('cMsg').value.trim();
+
+  // 2. Agrupa tudo em um texto organizado com quebras de linha
+  const waText = `*Novo Contato - daEnê*\n\n*Nome:* ${name}\n*E-mail:* ${email}\n*Telefone:* ${phone}\n*Mensagem:* ${msg}`;
+  const encodedText = encodeURIComponent(waText);
+
+  // 3. Redireciona o usuário para o seu número com o texto exato que ele digitou
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`, '_blank');
+
+  // 4. Mostra o alerta verde de sucesso na tela e limpa os campos do formulário
+  const successEl = document.getElementById('formSuccess');
+  if (successEl) {
+    successEl.style.display = 'block';
+    setTimeout(() => successEl.style.display = 'none', 4000);
+  }
+  e.target.reset();
+});
+
+// ─── Painel Admin ─────────────────────────────────────────────────────────────
+function openAdmin() {
+  renderAdminList();
+  document.getElementById('adminPanel')?.classList.add('open');
+  document.getElementById('adminOverlay')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAdmin() {
+  document.getElementById('adminPanel')?.classList.remove('open');
+  document.getElementById('adminOverlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('adminTrigger')?.addEventListener('click', openAdmin);
+document.getElementById('closeAdmin')?.addEventListener('click', closeAdmin);
+document.getElementById('adminOverlay')?.addEventListener('click', closeAdmin);
+
+function renderAdminList() {
+  const container = document.getElementById('adminProductList');
+  if (!container || typeof DB === 'undefined') return;
+  
+  const products = DB.getProducts();
+
+  container.innerHTML = products.map(p => {
+    const visualContent = p.img 
+      ? `<img src="${p.img}" class="admin-item-thumb" alt="${p.name}">`
+      : `<span class="admin-item-emoji">${p.emoji || '👜'}</span>`;
+
+    return `
+      <div class="admin-item">
+        ${visualContent}
+        <div class="admin-item-info">
+          <strong>${p.name}</strong>
+          <span>${DB.formatPrice(p.price)} — ${p.category} — ${p.stock}</span>
+        </div>
+        <div class="admin-item-actions">
+          <button class="btn-sm outline" onclick="loadProductEdit('${p.id}')">Editar</button>
+          <button class="btn-sm danger" onclick="deleteProductAdmin('${p.id}')">Excluir</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadProductEdit(id) {
+  if (typeof DB === 'undefined') return;
+  const p = DB.getProduct(id);
+  if (!p) return;
+  
+  document.getElementById('editId').value = p.id;
+  document.getElementById('pName').value = p.name;
+  document.getElementById('pPrice').value = p.price;
+  document.getElementById('pCat').value = p.category;
+  document.getElementById('pEmoji').value = p.emoji || '';
+  document.getElementById('pImg').value = p.img || '';
+  document.getElementById('pShort').value = p.short;
+  document.getElementById('pDesc').value = p.description || '';
+  document.getElementById('pStock').value = p.stock;
+  document.getElementById('pFeatured').value = p.featured ? '1' : '0';
+  document.getElementById('adminForm')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteProductAdmin(id) {
+  if (typeof DB === 'undefined' || !confirm('Deseja excluir este produto?')) return;
+  DB.deleteProduct(id);
+  renderAdminList();
+  renderProducts(currentCat);
+}
+
+document.getElementById('clearForm')?.addEventListener('click', () => {
+  document.getElementById('adminForm')?.reset();
+  const editId = document.getElementById('editId');
+  if (editId) editId.value = '';
+});
+
+document.getElementById('adminForm')?.addEventListener('submit', e => {
+  e.preventDefault();
+  if (typeof DB === 'undefined') return;
+
+  const id = document.getElementById('editId').value;
+  const product = {
+    ...(id ? { id } : {}),
+    name: document.getElementById('pName').value.trim(),
+    price: parseFloat(document.getElementById('pPrice').value),
+    category: document.getElementById('pCat').value,
+    emoji: document.getElementById('pEmoji').value.trim() || '👜',
+    img: document.getElementById('pImg').value.trim(),
+    short: document.getElementById('pShort').value.trim(),
+    description: document.getElementById('pDesc').value.trim(),
+    stock: document.getElementById('pStock').value,
+    featured: document.getElementById('pFeatured').value === '1',
+  };
+
+  DB.saveProduct(product);
+  document.getElementById('adminForm').reset();
+  document.getElementById('editId').value = '';
+  renderAdminList();
+  renderProducts(currentCat);
+});
