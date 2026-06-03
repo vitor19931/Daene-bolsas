@@ -4,7 +4,7 @@
 
 const Cart = (() => {
   const KEY = 'daene_cart';
-  const WA_NUMBER = '5500000000000'; // ← Substitua aqui pelo seu número real com DDD (Apenas números)
+  const WA_NUMBER = '5571988378939'; // Seu número real adicionado!
 
   function getItems() {
     return JSON.parse(localStorage.getItem(KEY) || '[]');
