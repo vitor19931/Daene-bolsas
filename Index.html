@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>daEnê — Costura Criativa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="brand">
+      <span>daEnê</span>
+      <small>costura criativa</small>
+    </div>
+    <nav class="main-nav" id="mainNav">
+      <a href="#inicio" class="active">Início</a>
+      <a href="#colecoes">Coleções</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <button class="cart-btn" id="cartBtn" title="Ver Carrinho">
+        👜
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <section class="hero reveal" id="inicio">
+    <div class="hero-text">
+      <span class="label">Ateliê Autoral</span>
+      <h1>Bolsas e acessórios feitos à mão com <em>propósito</em> e afeto.</h1>
+      <p>Peças exclusivas confeccionadas de forma artesanal, unindo o charme da costura criativa à funcionalidade que o seu dia a dia exige.</p>
+      <div class="hero-ctas">
+        <a href="#colecoes" class="btn-primary">Conhecer Coleção</a>
+        <a href="#contato" class="btn-outline">Encomenda Personalizada</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <strong>100%</strong>
+          <span>Artesanal</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <strong>Exclusivo</strong>
+          <span>Design Próprio</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-glow"></div>
+      <span class="hero-badge">Peças<br>Limitadas</span>
+      <div class="hero-img-wrap">
+        <div class="hero-img-placeholder">
+          👜
+          <small>daEnê Costura Criativa</small>
+        </div>
+      </div>
+      <span class="hero-tag-float">✨ Feito sob medida</span>
+    </div>
+  </section>
+
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <span>✦ COSTURA CRIATIVA AUTORAL</span>
+      <span>✦ FEITO À MÃO NO BRASIL</span>
+      <span>✦ ENCOMENDAS PERSONALIZADAS</span>
+      <span>✦ MATERIAIS PREMIUM</span>
+      <span>✦ BOLSAS EXCLUSIVAS</span>
+    </div>
+  </div>
+
+  <section class="section reveal" id="colecoes">
+    <div class="section-header">
+      <div class="num">01</div>
+      <div>
+        <h2>Nossas Peças</h2>
+        <p>Explore bolsas exclusivas em estoque ou encomende com as suas cores preferidas.</p>
+      </div>
+    </div>
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-cat="todas">Todas</button>
+      <button class="filter-btn" data-cat="totes">Totes & Shoulder</button>
+      <button class="filter-btn" data-cat="mochilas">Mochilas</button>
+      <button class="filter-btn" data-cat="clutches">Clutches</button>
+      <button class="filter-btn" data-cat="necessaires">Necessaires</button>
+      <button class="filter-btn" data-cat="minibags">Mini Bags</button>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <section class="section reveal" id="sobre">
+    <div class="section-header">
+      <div class="num">02</div>
+      <div>
+        <h2>O Ateliê daEnê</h2>
+        <p>Conheça os pilares do nosso trabalho artesanal e o carinho por trás de cada costura.</p>
+      </div>
+    </div>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-icon">🧵</div>
+        <h3>Processo Autoral</h3>
+        <p>Cada peça começa do zero: desde a modelagem, corte dos tecidos, até a aplicação cuidadosa das alças e ferragens.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🌱</div>
+        <h3>Consumo Consciente</h3>
+        <p>Trabalhamos com produção em baixa escala e sob encomenda, evitando o desperdício e focando na durabilidade total do seu acessório.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">💎</div>
+        <h3>Exclusividade</h3>
+        <p>Por ser um trabalho 100% manual, nenhuma bolsa é perfeitamente idêntica à outra. Você terá uma peça <strong>única no mundo</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal" id="contato">
+    <div class="section-header">
+      <div class="num">03</div>
+      <div>
+        <h2>Diga Olá</h2>
+        <p>Tem alguma dúvida, deseja um projeto sob medida ou um tecido específico? Escreva para nós!</p>
+      </div>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Vamos criar algo juntos?</h3>
+        <p>Preencha o formulário ao lado para iniciar um atendimento personalizado ou utilize nossos canais diretos abaixo:</p>
+        <ul class="contact-list">
+          <li>💬 WhatsApp: <a href="https://wa.me/5500000000000" target="_blank">(00) 00000-0000</a></li>
+          <li>📸 Instagram: <a href="https://instagram.com" target="_blank">@daene.costuracriativa</a></li>
+          <li>✉️ E-mail: <a href="mailto:contato@daene.com">contato@daene.com</a></li>
+        </ul>
+        <div class="contact-note">
+          <span>⏰ Atendimento de Segunda a Sexta, das 9h às 18h.</span>
+        </div>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label for="cName">Nome Completo</label>
+          <input type="text" id="cName" required placeholder="Seu nome...">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cEmail">E-mail</label>
+            <input type="email" id="cEmail" required placeholder="Seu melhor e-mail...">
+          </div>
+          <div class="form-group">
+            <label for="cPhone">WhatsApp</label>
+            <input type="tel" id="cPhone" required placeholder="(00) 00000-0000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cMsg">Sua Mensagem / Ideia de Encomenda</label>
+          <textarea id="cMsg" required placeholder="Conte-nos o que você deseja..."></textarea>
+        </div>
+        <div class="form-success" id="formSuccess">✓ Mensagem enviada com sucesso! Entraremos em contato em breve.</div>
+        <button type="submit" class="btn-primary">Enviar Mensagem</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <div class="cart-header-brand"><span>daEnê</span> Sacola</div>
+      <button class="close-btn" id="closeCart">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer" id="cartFooter">
+      <div class="cart-total">
+        <span>Total estimado:</span>
+        <strong id="cartTotal">R$ 0,00</strong>
+      </div>
+      <button class="btn-primary full" id="checkoutBtn">🛒 Concluir Encomenda no WhatsApp</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="product-modal" id="productModal">
+    <div class="modal-body">
+      <button class="close-btn modal-close" id="closeModal">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="admin-overlay" id="adminOverlay"></div>
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <div class="admin-brand"><span>daEnê</span><small>Painel Admin</small></div>
+      <button class="close-btn" id="closeAdmin">✕</button>
+    </div>
+    <div class="admin-body">
+      <h4>Adicionar ou Editar Peça</h4>
+      <form id="adminForm" class="contact-form" style="padding:0; background:none; border:none;">
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label for="pName">Nome do Produto</label>
+          <input type="text" id="pName" required placeholder="Ex: Bolsa Tote Classique">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pPrice">Preço (R$)</label>
+            <input type="number" id="pPrice" step="0.01" required placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label for="pCat">Categoria</label>
+            <select id="pCat" required>
+              <option value="totes">Totes & Shoulder</option>
+              <option value="mochilas">Mochilas</option>
+              <option value="clutches">Clutches</option>
+              <option value="necessaires">Necessaires</option>
+              <option value="minibags">Mini Bags</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pEmoji">Emoji de Fallback</label>
+            <input type="text" id="pEmoji" placeholder="Ex: 👜">
+          </div>
+          <div class="form-group">
+            <label for="pStock">Status do Estoque</label>
+            <select id="pStock" required>
+              <option value="disponivel">Disponível</option>
+              <option value="encomenda">Sob Encomenda</option>
+              <option value="esgotado">Esgotado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="pImg">Link / URL da Foto da Bolsa</label>
+          <input type="url" id="pImg" placeholder="https://exemplo.com/sua-foto.jpg">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pShort">Descrição Curta (Card)</label>
+            <input type="text" id="pShort" required placeholder="Ex: Compacta e perfeita para passeios.">
+          </div>
+          <div class="form-group">
+            <label for="pFeatured">Destacar Peça?</label>
+            <select id="pFeatured" required>
+              <option value="0">Não</option>
+              <option value="1">Sim (Selo Destaque)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="pDesc">Descrição Detalhada (Modal)</label>
+          <textarea id="pDesc" placeholder="Insira os detalhes técnicos, forro, bolsos internos, etc..."></textarea>
+        </div>
+        <div class="admin-actions">
+          <button type="button" class="btn-outline btn-sm" id="clearForm">Limpar Campos</button>
+          <button type="submit" class="btn-primary btn-sm">Salvar Peça</button>
+        </div>
+      </form>
+      <hr class="admin-divider">
+      <h4>Peças Cadastradas</h4>
+      <div id="adminProductList" style="display:flex; flex-direction:column; gap:1rem;"></div>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="brand-logo"><span>daEnê</span></div>
+        <p>costura criativa</p>
+      </div>
+      <div class="footer-links">
+        <a href="#inicio">Início</a>
+        <a href="#colecoes">Coleções</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contato">Contato</a>
+      </div>
+      <div class="footer-social">
+        <a href="#" target="_blank" title="Instagram">📸</a>
+        <a href="#" target="_blank" title="WhatsApp">💬</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; <span id="year"></span> daEnê Costura Criativa. Todos os direitos reservados.
+    </div>
+    <button class="admin-trigger" id="adminTrigger" title="Painel Admin">⚙️</button>
+  </footer>
+
+  <script src="db.js"></script>
+  <script src="cart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
