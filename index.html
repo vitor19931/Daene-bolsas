@@ -74,12 +74,12 @@
           <input type="text" id="cName" placeholder="Seu nome..." required>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
+        <div class="form-row" style="display: flex; gap: 20px;">
+          <div class="form-group" style="flex: 1;">
             <label for="cEmail">E-mail</label>
             <input type="email" id="cEmail" placeholder="Seu melhor e-mail..." required>
           </div>
-          <div class="form-group">
+          <div class="form-group" style="flex: 1;">
             <label for="cPhone">WhatsApp</label>
             <input type="tel" id="cPhone" placeholder="(00) 00000-0000" required>
           </div>
@@ -140,17 +140,17 @@
     <form id="adminForm" style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
       <input type="hidden" id="editId">
       
-      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
         Nome do Produto:
         <input type="text" id="pName" required style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
       </label>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
           Preço (Ex: 120.00):
           <input type="number" step="0.01" id="pPrice" required style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
         </label>
-        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
           Categoria:
           <select id="pCat" style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
             <option value="bolsas">Bolsas</option>
@@ -161,11 +161,11 @@
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
           Emoji (Sem foto):
           <input type="text" id="pEmoji" value="👜" style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
         </label>
-        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+        <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
           Estoque:
           <select id="pStock" style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
             <option value="disponivel">Disponível</option>
@@ -175,22 +175,22 @@
         </label>
       </div>
 
-      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
         URL da Imagem (Opcional):
         <input type="url" id="pImg" placeholder="https://..." style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
       </label>
 
-      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
         Descrição Curta (Card):
         <input type="text" id="pShort" required style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
       </label>
 
-      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
         Descrição Detalhada (Modal):
         <textarea id="pDesc" rows="3" style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px; resize: vertical;"></textarea>
       </label>
 
-      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px;">
+      <label style="display: flex; flex-direction: column; font-size: 0.9rem; gap: 4px; color: #fff; text-align: left;">
         Destacar Produto?
         <select id="pFeatured" style="width: 100%; padding: 10px; background: #1e1e1e; color: #fff; border: 1px solid #333; border-radius: 6px;">
           <option value="0">Não</option>
@@ -204,23 +204,23 @@
       </div>
     </form>
 
-    <style>
-      /* Estilos básicos inline rápidos apenas para a listagem interna do admin */
-      .admin-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #1a1a1a; border: 1px solid #2d2d2d; border-radius: 8px; margin-bottom: 8px; }
-      .admin-item-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
-      .admin-item-emoji { font-size: 1.5rem; width: 45px; text-align: center; }
-      .admin-item-info { flex: 1; display: flex; flex-direction: column; font-size: 0.85rem; }
-      .admin-item-actions { display: flex; gap: 5px; }
-      .btn-sm { padding: 6px 10px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
-      .btn-sm.outline { background: transparent; border: 1px solid #8a2be2; color: #8a2be2; }
-      .btn-sm.danger { background: #ff4757; color: #fff; }
-      .admin-trigger-btn { background: transparent; border: none; color: #666; cursor: pointer; font-size: 0.85rem; transition: color 0.2s; }
-      .admin-trigger-btn:hover { color: #8a2be2; }
-    </style>
-
-    <h3 style="margin-top: 25px; border-top: 1px solid #333; padding-top: 20px;">Peças Cadastradas</h3>
+    <h3 style="margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; color: #fff;">Peças Cadastradas</h3>
     <div id="adminProductList" style="margin-top: 12px;"></div>
   </div>
+
+  <style>
+    /* Correções rápidas para manter o painel interno do admin alinhado sem quebrar o site externo */
+    .admin-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: #1a1a1a; border: 1px solid #2d2d2d; border-radius: 8px; margin-bottom: 8px; text-align: left; }
+    .admin-item-thumb { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
+    .admin-item-emoji { font-size: 1.5rem; width: 45px; text-align: center; }
+    .admin-item-info { flex: 1; display: flex; flex-direction: column; font-size: 0.85rem; color: #fff; }
+    .admin-item-actions { display: flex; gap: 5px; }
+    .btn-sm { padding: 6px 10px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+    .btn-sm.outline { background: transparent; border: 1px solid #8a2be2; color: #8a2be2; }
+    .btn-sm.danger { background: #ff4757; color: #fff; }
+    .admin-trigger-btn { background: transparent; border: none; color: #666; cursor: pointer; font-size: 0.85rem; transition: color 0.2s; }
+    .admin-trigger-btn:hover { color: #8a2be2; }
+  </style>
 
   <script src="db.js"></script>
   <script src="cart.js"></script>
