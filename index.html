@@ -84,17 +84,17 @@
       <div class="num">01</div>
       <div>
         <h2>Nossas Peças</h2>
-        <p>Explore bolsas exclusivas em estoque ou encomende com as suas cores preferidas.</p>
+        <p>Explore nossas criações em estoque ou encomende com as suas combinações preferidas.</p>
       </div>
     </div>
 
     <div class="filters" id="filters">
       <button class="filter-btn active" data-cat="todas">Todas</button>
-      <button class="filter-btn" data-cat="totes">Totes & Shoulder</button>
       <button class="filter-btn" data-cat="mochilas">Mochilas</button>
-      <button class="filter-btn" data-cat="clutches">Clutches</button>
-      <button class="filter-btn" data-cat="necessaires">Necessaires</button>
-      <button class="filter-btn" data-cat="minibags">Mini Bags</button>
+      <button class="filter-btn" data-cat="pochetes">Pochetes</button>
+      <button class="filter-btn" data-cat="bolsas">Bolsas & Shoulder</button>
+      <button class="filter-btn" data-cat="praia">Coleção Praia</button>
+      <button class="filter-btn" data-cat="acessorios">Acessórios</button>
     </div>
 
     <div class="product-grid" id="productGrid"></div>
@@ -140,7 +140,7 @@
         <h3>Vamos criar algo juntos?</h3>
         <p>Preencha o formulário ao lado para iniciar um atendimento personalizado ou utilize nossos canais diretos abaixo:</p>
         <ul class="contact-list">
-          <li>💬 WhatsApp: <a href="https://wa.me/5571988378939" target="_blank">(71) 98837-8939</a></li>
+          <li>💬 WhatsApp: <a href="https://wa.me/557192135975" target="_blank">(71) 9213-5975</a></li>
           <li>📸 Instagram: <a href="https://instagram.com/daenecosturacriativa" target="_blank">@daene.costuracriativa</a></li>
           <li>✉️ E-mail: <a href="mailto:contatodaene@gmail.com">contatodaene@gmail.com</a></li>
         </ul>
@@ -160,12 +160,12 @@
           </div>
           <div class="form-group">
             <label for="cPhone">WhatsApp</label>
-            <input type="tel" id="cPhone" required placeholder="(00) 00000-0000">
+            <input type="tel" id="cPhone" required placeholder="(71) 9213-5975">
           </div>
         </div>
         <div class="form-group">
           <label for="cMsg">Sua Mensagem / Ideia de Encomenda</label>
-          <textarea id="cMsg" required placeholder="Conte-nos o que você deseja..."></textarea>
+          <textarea id="cMsg" required placeholder="Conte-nos o que você deseja criar..."></textarea>
         </div>
         <div class="form-success" id="formSuccess">✓ Mensagem enviada com sucesso! Entraremos em contato em breve.</div>
         <button type="submit" class="btn-primary">Enviar Mensagem</button>
@@ -209,7 +209,7 @@
         <input type="hidden" id="editId">
         <div class="form-group">
           <label for="pName">Nome do Produto</label>
-          <input type="text" id="pName" required placeholder="Ex: Bolsa Tote Classique">
+          <input type="text" id="pName" required placeholder="Ex: Mochila Pati">
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -219,18 +219,55 @@
           <div class="form-group">
             <label for="pCat">Categoria</label>
             <select id="pCat" required>
-              <option value="totes">Totes & Shoulder</option>
               <option value="mochilas">Mochilas</option>
-              <option value="clutches">Clutches</option>
-              <option value="necessaires">Necessaires</option>
-              <option value="minibags">Mini Bags</option>
+              <option value="pochetes">Pochetes</option>
+              <option value="bolsas">Bolsas & Shoulder</option>
+              <option value="praia">Coleção Praia</option>
+              <option value="acessorios">Acessórios</option>
             </select>
           </div>
         </div>
+        
+        <!-- Área de Upload de Foto com Ajustador de Quadrado Interativo -->
+        <div class="form-group">
+          <label>Foto da Peça</label>
+          <div class="file-upload-wrapper">
+            <input type="file" id="pImgFile" accept="image/*">
+            <div class="file-upload-design">
+              <span>📸 Escolher foto ou Tirar foto com o celular</span>
+            </div>
+          </div>
+          
+          <div class="admin-preview-box" id="adminPreviewBox">
+            <p style="font-size:0.75rem; color:var(--muted); margin-bottom:0.5rem; text-align:center;">Arraste os controles abaixo para enquadrar a peça perfeitamente:</p>
+            
+            <div class="crop-container-frame">
+              <canvas id="cropCanvas" width="400" height="400"></canvas>
+            </div>
+            
+            <div class="control-group-sliders">
+              <div class="slider-row">
+                <label>🔍 Zoom</label>
+                <input type="range" id="sliderZoom" min="1" max="4" step="0.05" value="1">
+              </div>
+              <div class="slider-row">
+                <label>↔️ Lado</label>
+                <input type="range" id="sliderX" min="-300" max="300" step="1" value="0">
+              </div>
+              <div class="slider-row">
+                <label>↕️ Altura</label>
+                <input type="range" id="sliderY" min="-300" max="300" step="1" value="0">
+              </div>
+            </div>
+            
+            <button type="button" class="remove-preview-btn" id="removePreviewBtn">Remover Foto</button>
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label for="pEmoji">Emoji de Fallback</label>
-            <input type="text" id="pEmoji" placeholder="Ex: 👜">
+            <label for="pEmoji">Emoji Alternativo (Caso não queira foto)</label>
+            <input type="text" id="pEmoji" placeholder="Ex: 🎒">
           </div>
           <div class="form-group">
             <label for="pStock">Status do Estoque</label>
@@ -241,14 +278,10 @@
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label for="pImg">Link / URL da Foto da Bolsa</label>
-          <input type="url" id="pImg" placeholder="https://exemplo.com/sua-foto.jpg">
-        </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="pShort">Descrição Curta (Card)</label>
-            <input type="text" id="pShort" required placeholder="Ex: Compacta e perfeita para passeios.">
+            <label for="pShort">Descrição Curta (Vitrine)</label>
+            <input type="text" id="pShort" required placeholder="Ex: Compacta e cheia de charme.">
           </div>
           <div class="form-group">
             <label for="pFeatured">Destacar Peça?</label>
@@ -259,7 +292,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="pDesc">Descrição Detalhada (Modal)</label>
+          <label for="pDesc">Descrição Detalhada (Modal expandido)</label>
           <textarea id="pDesc" placeholder="Insira os detalhes técnicos, forro, bolsos internos, etc..."></textarea>
         </div>
         <div class="admin-actions">
@@ -287,7 +320,7 @@
       </div>
       <div class="footer-social">
         <a href="https://instagram.com/daenecosturacriativa" target="_blank" title="Instagram">📸</a>
-        <a href="https://wa.me/5571988378939" target="_blank" title="WhatsApp">💬</a>
+        <a href="https://wa.me/557192135975" target="_blank" title="WhatsApp">💬</a>
       </div>
     </div>
     <div class="footer-bottom">
