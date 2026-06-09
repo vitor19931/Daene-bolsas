@@ -1,20 +1,20 @@
 /**
- * daEnê — Script Principal
+ * daEnê — Script de Interatividade e Controle Principal
  */
 
-// ─── Configuração Compartilhada do WhatsApp ──────────────────────────────────
-const WHATSAPP_NUMBER = typeof Cart !== 'undefined' && Cart.WA_NUMBER ? Cart.WA_NUMBER : '5571988378939'; 
+const WHATSAPP_NUMBER = typeof Cart !== 'undefined' && Cart.WA_NUMBER ? Cart.WA_NUMBER : '557192135975'; 
+let loadedImageBase64 = ""; 
+let currentImageObject = null; // Guarda o objeto da imagem carregada para edição ao vivo
 
-// ─── Ano no rodapé ───────────────────────────────────────────────────────────
+// Atualização de data do copyright
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-// ─── Inicialização do carrinho ───────────────────────────────────────────────
 if (typeof Cart !== 'undefined') {
   Cart.updateCount();
 }
 
-// ─── Navegação / Menu Mobile ─────────────────────────────────────────────────
+// Menu Mobile Transicional
 const menuToggle = document.getElementById('menuToggle');
 const mainNav = document.getElementById('mainNav');
 
@@ -30,7 +30,7 @@ mainNav?.querySelectorAll('a').forEach(a => {
   });
 });
 
-// ─── CONSERTO: Efeito Active Nav Link Correto no Scroll ──────────────────────
+// Sincronização de Menu de Rolagem (Scroll Spy)
 const navLinks = document.querySelectorAll('.main-nav a');
 const sectionObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
@@ -43,7 +43,7 @@ const sectionObs = new IntersectionObserver(entries => {
 
 document.querySelectorAll('section[id]').forEach(s => sectionObs.observe(s));
 
-// ─── CONSERTO: Animação Reveal on Scroll Limpa ───────────────────────────────
+// Animações Fluídas de Reveal no Scroll
 const revObs = new IntersectionObserver((entries, obs) => {
   entries.forEach(e => { 
     if (e.isIntersecting) { 
@@ -55,13 +55,13 @@ const revObs = new IntersectionObserver((entries, obs) => {
 
 document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
 
-// ─── Eventos do Carrinho ─────────────────────────────────────────────────────
+// Ouvintes do Carrinho Gaveta
 document.getElementById('cartBtn')?.addEventListener('click', () => Cart?.openDrawer());
 document.getElementById('cartOverlay')?.addEventListener('click', () => Cart?.closeDrawer());
 document.getElementById('closeCart')?.addEventListener('click', () => Cart?.closeDrawer());
 document.getElementById('checkoutBtn')?.addEventListener('click', () => Cart?.checkout());
 
-// ─── Renderizar Produtos ──────────────────────────────────────────────────────
+// Renderizador da Vitrine com Filtragem Dinâmica
 let currentCat = 'todas';
 
 function renderProducts(cat = 'todas') {
@@ -71,7 +71,7 @@ function renderProducts(cat = 'todas') {
 
   const products = DB.getByCategory(cat);
   if (products.length === 0) {
-    grid.innerHTML = '<p class="no-products">Nenhuma peça encontrada nessa categoria.</p>';
+    grid.innerHTML = '<p class="no-products">Nenhuma peça cadastrada nesta categoria no momento.</p>';
     return;
   }
 
@@ -111,7 +111,7 @@ function renderProducts(cat = 'todas') {
   }).join('');
 }
 
-// ─── Filtros ──────────────────────────────────────────────────────────────────
+// Filtros
 document.getElementById('filters')?.addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
@@ -120,10 +120,9 @@ document.getElementById('filters')?.addEventListener('click', e => {
   renderProducts(btn.dataset.cat);
 });
 
-// Inicialização primária
 renderProducts();
 
-// ─── Modal de Produto ─────────────────────────────────────────────────────────
+// Modal Detalhes da Peça
 function openModal(id) {
   if (typeof DB === 'undefined') return;
   const p = DB.getProduct(id);
@@ -134,9 +133,9 @@ function openModal(id) {
     : `<div class="modal-emoji">${p.emoji || '👜'}</div>`;
 
   const stockText = { 
-    disponivel: 'Disponível em estoque', 
-    encomenda: 'Disponível sob encomenda (prazo a combinar)', 
-    esgotado: 'Temporariamente esgotado' 
+    disponivel: 'Disponível em estoque no ateliê', 
+    encomenda: 'Disponível sob encomenda', 
+    esgotado: 'Temporariamente indisponível' 
   }[p.stock];
 
   const modalBody = document.getElementById('modalBody');
@@ -148,7 +147,7 @@ function openModal(id) {
     <h2>${p.name}</h2>
     <p class="modal-desc">${p.description || p.short}</p>
     <div class="modal-meta">
-      <span class="modal-stock">${stockText}</span>
+      <span class="modal-stock">● ${stockText}</span>
     </div>
     <div class="modal-price">${DB.formatPrice(p.price)}</div>
     <div class="modal-actions">
@@ -156,7 +155,7 @@ function openModal(id) {
         ? `<button class="btn-primary" onclick="Cart.add('${p.id}'); closeModal()">🛒 Adicionar ao Carrinho</button>`
         : ''
       }
-      <a class="btn-outline" href="https://wa.me/${WHATSAPP_NUMBER}?text=Olá!+Tenho+interesse+na+peça:+${encodeURIComponent(p.name)}" target="_blank">💬 Perguntar no WhatsApp</a>
+      <a class="btn-outline" href="https://wa.me/${WHATSAPP_NUMBER}?text=Olá!+Gostaria+de+saber+mais+sobre+a+peça:+${encodeURIComponent(p.name)}" target="_blank">💬 Perguntar no WhatsApp</a>
     </div>
   `;
 
@@ -165,19 +164,25 @@ function openModal(id) {
   document.body.style.overflow = 'hidden';
 }
 
-// ─── MODIFICAÇÃO: Painel Admin Protegido por Senha ───────────────────────────
+function closeModal() {
+  document.getElementById('productModal')?.classList.remove('open');
+  document.getElementById('modalOverlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('closeModal')?.addEventListener('click', closeModal);
+document.getElementById('modalOverlay')?.addEventListener('click', closeModal);
+
+// Painel Admin Protegido por Chave de Acesso
 function openAdmin() {
-  // Você pode alterar a senha alterando o texto entre as aspas abaixo:
-  const SENHA_CORRETA = "admin123"; 
-  
-  const senhaDigitada = prompt("Digite a senha de administrador para acessar o painel:");
+  const SENHA_CORRETA = "Daene1234"; 
+  const senhaDigitada = prompt("Digite a credencial de segurança administrativa:");
   
   if (senhaDigitada !== SENHA_CORRETA) {
-    alert("Senha incorreta ou acesso negado!");
-    return; // Cancela a abertura do painel
+    alert("Chave de segurança incorreta ou acesso negado.");
+    return; 
   }
 
-  // Se a senha estiver correta, abre o painel normalmente
   renderAdminList();
   document.getElementById('adminPanel')?.classList.add('open');
   document.getElementById('adminOverlay')?.classList.add('open');
@@ -194,27 +199,85 @@ document.getElementById('adminTrigger')?.addEventListener('click', openAdmin);
 document.getElementById('closeAdmin')?.addEventListener('click', closeAdmin);
 document.getElementById('adminOverlay')?.addEventListener('click', closeAdmin);
 
-function closeModal() {
-  document.getElementById('productModal')?.classList.remove('open');
-  document.getElementById('modalOverlay')?.classList.remove('open');
-  document.body.style.overflow = '';
-}
+// Mecanismo Avançado de Ajuste da Imagem (Zoom e Movimento por Canvas)
+document.getElementById('pImgFile')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
 
-document.getElementById('closeModal')?.addEventListener('click', closeModal);
-document.getElementById('modalOverlay')?.addEventListener('click', closeModal);
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    currentImageObject = new Image();
+    currentImageObject.src = event.target.result;
+    currentImageObject.onload = function() {
+      // Reseta os valores dos controles deslizantes
+      document.getElementById('sliderZoom').value = 1;
+      document.getElementById('sliderX').value = 0;
+      document.getElementById('sliderY').value = 0;
+      
+      // Define limites dinâmicos para mover com base no tamanho da imagem carregada
+      const maxRange = Math.max(currentImageObject.width, currentImageObject.height);
+      document.getElementById('sliderX').min = -maxRange;
+      document.getElementById('sliderX').max = maxRange;
+      document.getElementById('sliderY').min = -maxRange;
+      document.getElementById('sliderY').max = maxRange;
 
-// ─── Formulário de Contato ────────────────────────────────────────────────────
-document.getElementById('contactForm')?.addEventListener('submit', e => {
-  e.preventDefault();
-  const successEl = document.getElementById('formSuccess');
-  if (successEl) {
-    successEl.style.display = 'block';
-    setTimeout(() => successEl.style.display = 'none', 4000);
-  }
-  e.target.reset();
+      updateCropCanvas();
+    }
+  };
+  reader.readAsDataURL(file);
 });
 
-// MODIFICAÇÃO: Renderiza foto real da bolsa na lista administrativa se houver link
+// Atualiza a renderização do corte em tempo real conforme mexe nos sliders
+function updateCropCanvas() {
+  if (!currentImageObject) return;
+
+  const canvas = document.getElementById('cropCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const zoom = parseFloat(document.getElementById('sliderZoom').value);
+  const panX = parseFloat(document.getElementById('sliderX').value);
+  const panY = parseFloat(document.getElementById('sliderY').value);
+
+  // Limpa o canvas de visualização
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Encontra a escala ideal para cobrir o quadrado de 400x400
+  const baseScale = Math.max(canvas.width / currentImageObject.width, canvas.height / currentImageObject.height);
+  const finalScale = baseScale * zoom;
+
+  const widthRenderizada = currentImageObject.width * finalScale;
+  const heightRenderizada = currentImageObject.height * finalScale;
+
+  // Centraliza e aplica o deslocamento manual (panX e panY)
+  const posX = (canvas.width - widthRenderizada) / 2 + panX;
+  const posY = (canvas.height - heightRenderizada) / 2 + panY;
+
+  ctx.drawImage(currentImageObject, posX, posY, widthRenderizada, heightRenderizada);
+
+  // Salva no estado base64 otimizado (Qualidade de 65% para garantir espaço no localStorage)
+  loadedImageBase64 = canvas.toDataURL('image/jpeg', 0.65);
+
+  const box = document.getElementById('adminPreviewBox');
+  if (box) box.style.display = 'flex';
+}
+
+// Vincula o evento de arrastar nos sliders para atualizar a foto instantaneamente
+['sliderZoom', 'sliderX', 'sliderY'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', updateCropCanvas);
+});
+
+document.getElementById('removePreviewBtn')?.addEventListener('click', () => {
+  currentImageObject = null;
+  loadedImageBase64 = "";
+  const fileInput = document.getElementById('pImgFile');
+  if(fileInput) fileInput.value = "";
+  const box = document.getElementById('adminPreviewBox');
+  if(box) box.style.display = 'none';
+});
+
+// CRUD do Admin
 function renderAdminList() {
   const container = document.getElementById('adminProductList');
   if (!container || typeof DB === 'undefined') return;
@@ -223,15 +286,15 @@ function renderAdminList() {
 
   container.innerHTML = products.map(p => {
     const visualContent = p.img 
-      ? `<img src="${p.img}" class="admin-item-thumb" alt="${p.name}">`
-      : `<span class="admin-item-emoji">${p.emoji || '👜'}</span>`;
+      ? `<img src="${p.img}">`
+      : p.emoji || '👜';
 
     return `
       <div class="admin-item">
-        ${visualContent}
+        <div class="admin-item-thumb">${visualContent}</div>
         <div class="admin-item-info">
           <strong>${p.name}</strong>
-          <span>${DB.formatPrice(p.price)} — ${p.category} — ${p.stock}</span>
+          <span>${DB.formatPrice(p.price)} — ${p.category}</span>
         </div>
         <div class="admin-item-actions">
           <button class="btn-sm outline" onclick="loadProductEdit('${p.id}')">Editar</button>
@@ -252,16 +315,32 @@ function loadProductEdit(id) {
   document.getElementById('pPrice').value = p.price;
   document.getElementById('pCat').value = p.category;
   document.getElementById('pEmoji').value = p.emoji || '';
-  document.getElementById('pImg').value = p.img || '';
   document.getElementById('pShort').value = p.short;
   document.getElementById('pDesc').value = p.description || '';
   document.getElementById('pStock').value = p.stock;
   document.getElementById('pFeatured').value = p.featured ? '1' : '0';
+  
+  if (p.img) {
+    currentImageObject = new Image();
+    currentImageObject.src = p.img;
+    currentImageObject.onload = function() {
+      document.getElementById('sliderZoom').value = 1;
+      document.getElementById('sliderX').value = 0;
+      document.getElementById('sliderY').value = 0;
+      updateCropCanvas();
+    }
+  } else {
+    currentImageObject = null;
+    loadedImageBase64 = "";
+    const box = document.getElementById('adminPreviewBox');
+    if(box) box.style.display = 'none';
+  }
+  
   document.getElementById('adminForm')?.scrollIntoView({ behavior: 'smooth' });
 }
 
 function deleteProductAdmin(id) {
-  if (typeof DB === 'undefined' || !confirm('Deseja excluir este produto?')) return;
+  if (typeof DB === 'undefined' || !confirm('Deseja definitivamente remover este item do catálogo?')) return;
   DB.deleteProduct(id);
   renderAdminList();
   renderProducts(currentCat);
@@ -269,8 +348,11 @@ function deleteProductAdmin(id) {
 
 document.getElementById('clearForm')?.addEventListener('click', () => {
   document.getElementById('adminForm')?.reset();
-  const editId = document.getElementById('editId');
-  if (editId) editId.value = '';
+  document.getElementById('editId').value = '';
+  currentImageObject = null;
+  loadedImageBase64 = "";
+  const box = document.getElementById('adminPreviewBox');
+  if(box) box.style.display = 'none';
 });
 
 document.getElementById('adminForm')?.addEventListener('submit', e => {
@@ -284,7 +366,7 @@ document.getElementById('adminForm')?.addEventListener('submit', e => {
     price: parseFloat(document.getElementById('pPrice').value),
     category: document.getElementById('pCat').value,
     emoji: document.getElementById('pEmoji').value.trim() || '👜',
-    img: document.getElementById('pImg').value.trim(),
+    img: loadedImageBase64, 
     short: document.getElementById('pShort').value.trim(),
     description: document.getElementById('pDesc').value.trim(),
     stock: document.getElementById('pStock').value,
@@ -294,6 +376,21 @@ document.getElementById('adminForm')?.addEventListener('submit', e => {
   DB.saveProduct(product);
   document.getElementById('adminForm').reset();
   document.getElementById('editId').value = '';
+  currentImageObject = null;
+  loadedImageBase64 = "";
+  const box = document.getElementById('adminPreviewBox');
+  if(box) box.style.display = 'none';
+  
   renderAdminList();
   renderProducts(currentCat);
+});
+
+document.getElementById('contactForm')?.addEventListener('submit', e => {
+  e.preventDefault();
+  const successEl = document.getElementById('formSuccess');
+  if (successEl) {
+    successEl.style.display = 'block';
+    setTimeout(() => successEl.style.display = 'none', 4000);
+  }
+  e.target.reset();
 });
