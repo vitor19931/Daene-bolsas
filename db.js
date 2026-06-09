@@ -1,247 +1,160 @@
 /**
- * daEnê — Banco de Dados (localStorage)
- * Gerencia produtos atualizados, fotos salvas, pedidos e cache.
+ * daEnê — Módulo do Carrinho (Cart)
+ * Gerencia a sacola de compras e a conexão com a API do WhatsApp.
  */
 
-const DB = (() => {
-  const KEYS = {
-    products: 'daene_products_v3', // Atualizado para v3 para limpar fotos antigas muito pesadas
-    orders: 'daene_orders',
-  };
+const Cart = (() => {
+  const WA_NUMBER = '557192135975'; 
+  const STORAGE_KEY = 'daene_cart_items_v3';
 
-  const DEFAULT_PRODUCTS = [
-    {
-      id: 'p001',
-      name: 'Mochila Pati',
-      price: 260.00,
-      category: 'mochilas',
-      emoji: '🎒',
-      img: '', 
-      short: 'Ergonômica, sofisticada e com espaço ideal para o dia a dia.',
-      description: 'A Mochila Pati une robustez à delicadeza da costura criativa autoral. Conta com forro estruturado, divisórias internas inteligentes e alças acolchoadas ajustáveis.',
-      stock: 'disponivel',
-      featured: true
-    },
-    {
-      id: 'p002',
-      name: 'Pochete Afro',
-      price: 120.00,
-      category: 'pochetes',
-      emoji: '👝',
-      img: '',
-      short: 'Estampa cultural marcante, trazendo identidade ao visual.',
-      description: 'Celebrando a ancestralidade e praticidade. Feita em tecido premium com acabamento impecável, fecho reforçado e regulagem confortável de cintura ou transversal.',
-      stock: 'disponivel',
-      featured: true
-    },
-    {
-      id: 'p003',
-      name: 'Pochete',
-      price: 110.00,
-      category: 'pochetes',
-      emoji: '👝',
-      img: '',
-      short: 'Design clássico, minimalista e leve para saídas dinâmicas.',
-      description: 'Nossa pochete tradicional oferece a liberdade e segurança que você precisa, comportando perfeitamente smartphone, carteira e chaves com total estilo.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p004',
-      name: 'Kit Bolsa Praia',
-      price: 140.00,
-      category: 'praia',
-      emoji: '🏖️',
-      img: '',
-      short: 'Conjunto coordenado indispensável para dias ensolarados.',
-      description: 'O kit definitivo para o verão. Materiais de altíssima durabilidade, resistentes à água e fáceis de higienizar. Estética descontraída e refinada.',
-      stock: 'encomenda',
-      featured: true
-    },
-    {
-      id: 'p005',
-      name: 'Shoulder Mini',
-      price: 130.00,
-      category: 'bolsas',
-      emoji: '👜',
-      img: '',
-      short: 'Compacta por fora, surpreendente por dentro. Praticidade total.',
-      description: 'Perfeita para carregar apenas o essencial com máxima leveza. Alça transversal confortável e design geométrico atemporal.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p006',
-      name: 'Bolsa Praia em Tela',
-      price: 140.00,
-      category: 'praia',
-      emoji: '👜',
-      img: '',
-      short: 'Moderna, arejada e projetada para não acumular areia.',
-      description: 'A Bolsa de Praia em Tela combina uma transparência sutil e elegante com a resistência necessária para os dias de veraneio.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p007',
-      name: 'Mochila Rafa',
-      price: 210.00,
-      category: 'mochilas',
-      emoji: '🎒',
-      img: '',
-      short: 'Visual contemporâneo, forrada e extremamente confortável.',
-      description: 'A Mochila Rafa equilibra versatilidade de uso com design autoral exclusivo. Excelente espaço interno protegido por fechamento seguro.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p008',
-      name: 'Bolsa Fashion',
-      price: 140.00,
-      category: 'bolsas',
-      emoji: '👜',
-      img: '',
-      short: 'Uma peça conceitual que eleva qualquer look instantaneamente.',
-      description: 'Desenvolvida para quem ama se destacar. Costuras reforçadas, design geométrico exclusivo do ateliê e texturas sofisticadas.',
-      stock: 'disponivel',
-      featured: true
-    },
-    {
-      id: 'p009',
-      name: 'Mochila Criativa',
-      price: 210.00,
-      category: 'mochilas',
-      emoji: '🎒',
-      img: '',
-      short: 'Combinações de cores exclusivas para expressar sua arte.',
-      description: 'Múltiplos bolsos funcionais e excelente compartimentação interna. Ideal para estudantes, profissionais e mentes criativas.',
-      stock: 'encomenda',
-      featured: false
-    },
-    {
-      id: 'p010',
-      name: 'Shoulder Bag Afro',
-      price: 140.00,
-      category: 'bolsas',
-      emoji: '👜',
-      img: '',
-      short: 'Bolsa de ombro transversal com detalhes de rica identidade.',
-      description: 'Carregue sua ancestralidade e estilo lado a lado. Uma peça versátil e de alta durabilidade com fecho magnético ou zíper premium.',
-      stock: 'disponivel',
-      featured: true
-    },
-    {
-      id: 'p011',
-      name: 'Shoulder',
-      price: 130.00,
-      category: 'bolsas',
-      emoji: '👜',
-      img: '',
-      short: 'O equilíbrio exato entre o casual e o elegante para o ombro.',
-      description: 'Nossa clássica Shoulder Bag adapta-se perfeitamente a compromissos diurnos ou noturnos com simplicidade refinada.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p012',
-      name: 'Carteira',
-      price: 48.00,
-      category: 'acessorios',
-      emoji: '👛',
-      img: '',
-      short: 'Compacta e organizada para cartões, dinheiro e documentos.',
-      description: 'Feita sob medida para caber perfeitamente dentro de qualquer bolsa daEnê. Estrutura rígida e fechamento seguro por botão de pressão.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p013',
-      name: 'Mochila',
-      price: 180.00,
-      category: 'mochilas',
-      emoji: '🎒',
-      img: '',
-      short: 'Design tradicional em costura criativa com estrutura reforçada.',
-      description: 'A peça perfeita para carregar cadernos, casacos e pertences pesados com a maciez das alças artesanais exclusivas.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p014',
-      name: 'Bolsas',
-      price: 140.00,
-      category: 'bolsas',
-      emoji: '👜',
-      img: '',
-      short: 'Nossa criação clássica e coringa para todos os momentos.',
-      description: 'Feita com tecidos selecionados sob curadoria cuidadosa do ateliê. Conforto e atemporalidade garantidos.',
-      stock: 'disponivel',
-      featured: false
-    },
-    {
-      id: 'p015',
-      name: 'Pochete Tamanho M',
-      price: 80.00,
-      category: 'pochetes',
-      emoji: '👝',
-      img: '',
-      short: 'Espaço intermediário perfeito para quem busca conforto anatômico.',
-      description: 'Nem tão pequena, nem tão volumosa. Ajusta-se de forma ideal ao peito ou quadril para eventos, shows e caminhadas.',
-      stock: 'disponivel',
-      featured: false
-    }
-  ];
+  function getItems() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  }
 
-  function init() {
-    const saved = localStorage.getItem(KEYS.products);
-    if (!saved || JSON.parse(saved).length !== 15) {
-      localStorage.setItem(KEYS.products, JSON.stringify(DEFAULT_PRODUCTS));
-    }
-    if (!localStorage.getItem(KEYS.orders)) {
-      localStorage.setItem(KEYS.orders, JSON.stringify([]));
+  function saveItems(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    updateCount();
+    if (document.getElementById('cartDrawer')?.classList.contains('open')) {
+      renderDrawer();
     }
   }
 
-  function getProducts() {
-    return JSON.parse(localStorage.getItem(KEYS.products) || '[]');
-  }
+  function add(productId) {
+    if (typeof DB === 'undefined') return;
+    const product = DB.getProduct(productId);
+    if (!product || product.stock === 'esgotado') return;
 
-  function getProduct(id) {
-    return getProducts().find(p => p.id === id) || null;
-  }
+    const items = getItems();
+    const existing = items.find(item => item.id === productId);
 
-  function saveProduct(data) {
-    const products = getProducts();
-    const existing = products.findIndex(p => p.id === data.id);
-    if (existing >= 0) {
-      products[existing] = { ...products[existing], ...data };
+    if (existing) {
+      existing.quantity += 1;
     } else {
-      data.id = 'p' + Date.now();
-      products.unshift(data);
+      items.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        emoji: product.emoji || '👜',
+        img: product.img || '',
+        quantity: 1
+      });
     }
-    try {
-      localStorage.setItem(KEYS.products, JSON.stringify(products));
-    } catch (e) {
-      alert("⚠️ Erro de espaço: O navegador bloqueou o salvamento. Verifique se o tamanho ou zoom das fotos anteriores está muito grande e tente reduzi-lo.");
+
+    saveItems(items);
+    
+    const btn = document.getElementById('cartBtn');
+    if (btn) {
+      btn.classList.remove('pulse');
+      void btn.offsetWidth; 
+      btn.classList.add('pulse');
     }
-    return data;
   }
 
-  function deleteProduct(id) {
-    const products = getProducts().filter(p => p.id !== id);
-    localStorage.setItem(KEYS.products, JSON.stringify(products));
+  function changeQty(productId, delta) {
+    let items = getItems();
+    const item = items.find(i => i.id === productId);
+    if (!item) return;
+
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      items = items.filter(i => i.id !== productId);
+    }
+    saveItems(items);
   }
 
-  function getByCategory(cat) {
-    const all = getProducts();
-    return cat === 'todas' ? all : all.filter(p => p.category === cat);
+  function remove(productId) {
+    const items = getItems().filter(i => i.id !== productId);
+    saveItems(items);
   }
 
-  function formatPrice(value) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  function updateCount() {
+    const countEl = document.getElementById('cartCount');
+    if (!countEl) return;
+    const total = getItems().reduce((acc, curr) => acc + curr.quantity, 0);
+    countEl.textContent = total;
   }
 
-  return { init, getProducts, getProduct, saveProduct, deleteProduct, getByCategory, formatPrice };
+  function openDrawer() {
+    renderDrawer();
+    document.getElementById('cartDrawer')?.classList.add('open');
+    document.getElementById('cartOverlay')?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    document.getElementById('cartDrawer')?.classList.remove('open');
+    document.getElementById('cartOverlay')?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function renderDrawer() {
+    const container = document.getElementById('cartItems');
+    const totalEl = document.getElementById('cartTotal');
+    if (!container || !totalEl || typeof DB === 'undefined') return;
+
+    const items = getItems();
+
+    if (items.length === 0) {
+      container.innerHTML = `
+        <div class="cart-empty">
+          <span>👜</span>
+          <p>Sua sacola está vazia</p>
+          <small>Adicione peças lindas do catálogo!</small>
+        </div>
+      `;
+      totalEl.textContent = DB.formatPrice(0);
+      return;
+    }
+
+    container.innerHTML = items.map(item => {
+      const iconContent = item.img 
+        ? `<img src="${item.img}" alt="${item.name}">` 
+        : item.emoji;
+
+      return `
+        <div class="cart-item">
+          <div class="cart-item-icon">${iconContent}</div>
+          <div class="cart-item-info">
+            <strong>${item.name}</strong>
+            <span>${DB.formatPrice(item.price)}</span>
+            <span class="remove-btn" onclick="Cart.remove('${item.id}')">Remover</span>
+          </div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" onclick="Cart.changeQty('${item.id}', -1)">-</button>
+            <span>${item.quantity}</span>
+            <button class="qty-btn" onclick="Cart.changeQty('${item.id}', 1)">+</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const totalCost = items.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+    totalEl.textContent = DB.formatPrice(totalCost);
+  }
+
+  function checkout() {
+    const items = getItems();
+    if (items.length === 0 || typeof DB === 'undefined') return;
+
+    let msg = `✨ *Novo Pedido — daEnê Costura Criativa* ✨\n\n`;
+    msg += `Olá, gostaria de encomendar as seguintes peças:\n`;
+    msg += `─────────────────────────\n`;
+
+    items.forEach(item => {
+      msg += `• *${item.quantity}x* ${item.name} — ${DB.formatPrice(item.price * item.quantity)}\n`;
+    });
+
+    const totalCost = items.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+    msg += `─────────────────────────\n`;
+    msg += `*Total Estimado:* ${DB.formatPrice(totalCost)}\n\n`;
+    msg += `Por favor, verifique a disponibilidade das peças para mim. Obrigado! ❤️`;
+
+    localStorage.removeItem(STORAGE_KEY);
+    updateCount();
+    closeDrawer();
+
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  return { WA_NUMBER, add, changeQty, remove, updateCount, openDrawer, closeDrawer, checkout };
 })();
-
-DB.init();
