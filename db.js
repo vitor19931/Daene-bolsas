@@ -1,103 +1,204 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyA9...",
-  authDomain: "daene-costura.firebaseapp.com",
-  databaseURL: "https://daene-costura-default-rtdb.firebaseio.com",
-  projectId: "daene-costura"
-};
+/**
+ * daEnê — Carrinho / Sacola de Compras
+ */
 
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+const Cart = (() => {
+  const WA_NUMBER = '557192135975';
+  let items = [];
+  let isInitialized = false;
 
-const DB = (() => {
-
-  let cachedProducts = [];
-  let initialized = false;
-  let hasSeeded = false;
-
-  database.ref('products').on('value', (snapshot) => {
-    const data = snapshot.val();
-
-    if (data) {
-      const map = new Map();
-
-      Object.values(data).forEach(p => {
-        const key = p.name.trim().toLowerCase() + "|" + p.category;
-
-        if (!map.has(key)) {
-          map.set(key, p);
+  function _loadFromStorage() {
+    try {
+      const stored = localStorage.getItem('daene_cart');
+      items = stored ? JSON.parse(stored) : [];
+      
+      items = items.filter(item => {
+        if (!item.id || typeof item.qty !== 'number' || item.qty < 1) {
+          return false;
+        }
+        return true;
+      });
+      
+      const uniqueMap = new Map();
+      items.forEach(item => {
+        if (uniqueMap.has(item.id)) {
+          uniqueMap.get(item.id).qty += item.qty;
         } else {
-          const existing = map.get(key);
-
-          // mantém o melhor (com img)
-          const hasImg = p.img && p.img.length > 50;
-          const existingHasImg = existing.img && existing.img.length > 50;
-
-          if (hasImg && !existingHasImg) {
-            map.set(key, p);
-          }
+          uniqueMap.set(item.id, { ...item });
         }
       });
+      items = Array.from(uniqueMap.values());
+      
+      if (stored && stored !== JSON.stringify(items)) {
+        _save();
+      }
+      isInitialized = true;
+    } catch (error) {
+      console.error('Erro ao carregar carrinho:', error);
+      items = [];
+      isInitialized = true;
+    }
+  }
 
-      cachedProducts = [...map.values()].sort(
-        (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
-      );
+  function _save() {
+    try {
+      localStorage.setItem('daene_cart', JSON.stringify(items));
+    } catch (error) {
+      console.error('Erro ao salvar carrinho:', error);
+    }
+  }
 
-    } else {
-      cachedProducts = [];
+  function add(id, clickedBtn = null) {
+    if (typeof DB === 'undefined') return;
+    const product = DB.getProduct(id);
+    if (!product || product.stock === 'esgotado') return;
+
+    const existing = items.find(i => i.id === id);
+    existing ? existing.qty++ : items.push({ id, qty: 1 });
+
+    _save();
+    updateCount();
+    render();
+    openDrawer();
+
+    const btn = document.getElementById('cartBtn');
+    if (btn) {
+      btn.classList.add('pulse');
+      setTimeout(() => btn.classList.remove('pulse'), 400);
     }
 
-    if (initialized) {
-      renderProducts(currentCat || 'todas');
-      if (typeof renderAdminList === 'function') renderAdminList();
+    /* ── Feedback Dinâmico no Botão clicado (Aprimoramento Visual Reativo) ─ */
+    if (clickedBtn) {
+      const originalText = clickedBtn.textContent;
+      clickedBtn.textContent = '✓ Adicionado';
+      clickedBtn.style.backgroundColor = 'var(--green)';
+      clickedBtn.style.borderColor = 'var(--green)';
+      clickedBtn.disabled = true;
+      setTimeout(() => {
+        clickedBtn.textContent = originalText;
+        clickedBtn.style.backgroundColor = '';
+        clickedBtn.style.borderColor = '';
+        clickedBtn.disabled = false;
+      }, 1500);
+    }
+  }
+
+  function remove(id) {
+    items = items.filter(i => i.id !== id);
+    _save(); updateCount(); render();
+  }
+
+  function changeQty(id, delta) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) { remove(id); return; }
+    _save(); updateCount(); render();
+  }
+
+  function updateCount() {
+    const el = document.getElementById('cartCount');
+    if (!el) return;
+    const total = items.reduce((s, i) => s + i.qty, 0);
+    el.textContent = total;
+    el.style.display = total > 0 ? 'flex' : 'none';
+  }
+
+  function openDrawer() {
+    render();
+    document.getElementById('cartDrawer')?.classList.add('open');
+    document.getElementById('cartOverlay')?.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    document.getElementById('cartDrawer')?.classList.remove('open');
+    document.getElementById('cartOverlay')?.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function render() {
+    const container = document.getElementById('cartItems');
+    const totalEl   = document.getElementById('cartTotal');
+    if (!container || typeof DB === 'undefined') return;
+
+    if (items.length === 0) {
+      container.innerHTML = `
+        <div class="cart-empty">
+          <span>👜</span>
+          <strong>Sua sacola está vazia.</strong>
+          <small style="color: var(--muted2)">Adicione peças para encomendá-las pelo WhatsApp.</small>
+        </div>`;
+      if (totalEl) totalEl.textContent = DB.formatPrice(0);
+      document.getElementById('cartFooter').style.display = 'none';
+      return;
     }
 
-    initialized = true;
+    let total = 0;
+    container.innerHTML = items.map(item => {
+      const p = DB.getProduct(item.id);
+      if (!p) return '';
+      total += p.price * item.qty;
+      const visual = p.img
+        ? `<img src="${p.img}" alt="${p.name}">`
+        : `<span>${p.emoji || '👜'}</span>`;
+      return `
+        <div class="cart-item">
+          <div class="cart-item-icon">${visual}</div>
+          <div class="cart-item-info">
+            <strong>${p.name}</strong>
+            <span>${DB.formatPrice(p.price)}</span>
+            <button class="remove-btn" onclick="Cart.remove('${item.id}')">Remover</button>
+          </div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" onclick="Cart.changeQty('${item.id}', -1)">−</button>
+            <span>${item.qty}</span>
+            <button class="qty-btn" onclick="Cart.changeQty('${item.id}', 1)">+</button>
+          </div>
+        </div>`;
+    }).join('');
 
-    if ((!data || Object.keys(data).length === 0) && !hasSeeded) {
-      hasSeeded = true;
-      seedDefaults();
-    }
-  });
-
-  function seedDefaults() {
-    const updates = {};
-    DEFAULT_PRODUCTS.forEach(p => updates[p.id] = p);
-    database.ref('products').update(updates);
+    if (totalEl) totalEl.textContent = DB.formatPrice(total);
+    document.getElementById('cartFooter').style.display = 'flex';
   }
 
-  function getProducts() { return cachedProducts; }
-  function getProduct(id) { return cachedProducts.find(p => p.id === id); }
+  function checkout() {
+    if (items.length === 0) { openDrawer(); return; }
+    if (typeof DB === 'undefined') return;
 
-  function saveProduct(data) {
-    if (!data.id) data.id = "p_" + Date.now();
-    if (!data.createdAt) data.createdAt = Date.now();
-    database.ref("products/" + data.id).set(data);
+    let texto = 'Olá, daEnê! 🌸 Gostaria de encomendar as seguintes peças:\n\n';
+    let total  = 0;
+
+    items.forEach(item => {
+      const p = DB.getProduct(item.id);
+      if (!p) return;
+      const sub = p.price * item.qty;
+      total += sub;
+      texto += `• *${item.qty}x ${p.name}* — ${DB.formatPrice(sub)}\n`;
+    });
+
+    texto += `\n*Total estimado: ${DB.formatPrice(total)}*\n\n`;
+    texto += 'Aguardo o retorno para combinarmos os tecidos, cores e entrega! ✨';
+
+    if (typeof DB.saveOrder === 'function') DB.saveOrder({ items: [...items], total });
+
+    items = [];
+    _save(); updateCount(); render(); closeDrawer();
+
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(texto)}`, '_blank');
   }
 
-  function deleteProduct(id) {
-    database.ref("products/" + id).remove();
-  }
+  _loadFromStorage();
 
-  function getByCategory(cat) {
-    return cat === "todas"
-      ? cachedProducts
-      : cachedProducts.filter(p => p.category === cat);
-  }
-
-  function formatPrice(v) {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(v);
-  }
-
-  return {
-    getProducts,
-    getProduct,
-    saveProduct,
-    deleteProduct,
-    getByCategory,
-    formatPrice
+  return { 
+    WA_NUMBER, 
+    add, 
+    remove, 
+    changeQty, 
+    updateCount, 
+    openDrawer, 
+    closeDrawer, 
+    render, 
+    checkout 
   };
-
 })();
