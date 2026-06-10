@@ -167,7 +167,7 @@
           <label for="cMsg">Sua Mensagem / Ideia de Encomenda</label>
           <textarea id="cMsg" required placeholder="Conte-nos o que você deseja criar..."></textarea>
         </div>
-        <div class="form-success" id="formSuccess">✓ Mensagem enviada com sucesso! Entraremos em contato em breve.</div>
+        <div class="form-success" id="formSuccess">✓ Mensagem enviada com sucesso! Redirecionando...</div>
         <button type="submit" class="btn-primary">Enviar Mensagem</button>
       </form>
     </div>
@@ -228,7 +228,6 @@
           </div>
         </div>
         
-        <!-- Área de Upload de Foto com Ajustador de Quadrado Interativo -->
         <div class="form-group">
           <label>Foto da Peça</label>
           <div class="file-upload-wrapper">
@@ -266,7 +265,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="pEmoji">Emoji Alternativo (Caso não queira foto)</label>
+            <label for="pEmoji">Emoji Alternativo</label>
             <input type="text" id="pEmoji" placeholder="Ex: 🎒">
           </div>
           <div class="form-group">
@@ -328,6 +327,9 @@
     </div>
     <button class="admin-trigger" id="adminTrigger" title="Painel Admin">⚙️</button>
   </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <script src="db.js"></script>
   <script src="cart.js"></script>
