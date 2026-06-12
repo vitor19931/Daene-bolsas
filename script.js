@@ -152,7 +152,7 @@ function closeModal() {
 $('closeModal')  ?.addEventListener('click', closeModal);
 $('modalOverlay')?.addEventListener('click', closeModal);
 
-/* ── Suporte à tecla ESC para fechar Modais e Carrinhos (Aprimoramento UX) ─ */
+/* ── Suporte à tecla ESC para fechar Modais e Carrinhos ─ */
 window.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeModal();
@@ -274,35 +274,35 @@ let isSubmittingForm = false;
 
 $('adminForm')?.addEventListener('submit', async e => {
   e.preventDefault();
-  
+
   // 🛡️ PROTEÇÃO CONTRA SUBMISSÃO DUPLA
   if (isSubmittingForm) return;
   isSubmittingForm = true;
-  
+
   if (typeof DB === 'undefined') {
     isSubmittingForm = false;
     return;
   }
 
   try {
-    // VALIDAÇÕES RIGOROSAS
+    // VALIDAÇÕES
     const name = $('pName').value.trim();
     const price = parseFloat($('pPrice').value);
     const category = $('pCat').value;
     const short = $('pShort').value.trim();
-    
+
     if (!name || name.length < 3) {
       alert('Nome do produto deve ter pelo menos 3 caracteres.');
       isSubmittingForm = false;
       return;
     }
-    
+
     if (!price || price <= 0) {
       alert('Preço deve ser maior que zero.');
       isSubmittingForm = false;
       return;
     }
-    
+
     if (!short || short.length < 5) {
       alert('Descrição curta deve ter pelo menos 5 caracteres.');
       isSubmittingForm = false;
@@ -312,14 +312,14 @@ $('adminForm')?.addEventListener('submit', async e => {
     let id = $('editId').value ? $('editId').value.trim() : '';
     const existingProduct = id ? DB.getProduct(id) : null;
 
-    // 🛡️ TRAVA ANTIDUPLICAÇÃO: Evita criar novo produto com nome+categoria já existente
+    // 🛡️ TRAVA ANTIDUPLICAÇÃO: evita criar novo produto com nome+categoria já existente
     if (!id) {
       const inputNameLower = name.toLowerCase();
-      const duplicate = DB.getProducts().find(p => 
-        p.name.trim().toLowerCase() === inputNameLower && 
+      const duplicate = DB.getProducts().find(p =>
+        p.name.trim().toLowerCase() === inputNameLower &&
         p.category === category
       );
-      
+
       if (duplicate) {
         alert(`Já existe um produto com o nome "${name}" nesta categoria. Edite o existente ou mude o nome/categoria.`);
         isSubmittingForm = false;
@@ -327,17 +327,20 @@ $('adminForm')?.addEventListener('submit', async e => {
       }
     }
 
-    // 🖼️ TRAVA INTELIGENTE DE IMAGEM: Garante que apenas uma nova imagem seja salva
+    // 🖼️ IMAGEM: exporta nova imagem se houver, senão mantém a anterior
     let finalImg = '';
-    
+
     if (cropState.isNewImage && cropState.imageObj) {
-      // Uma nova imagem foi carregada - exporta ela
-      finalImg = _exportCroppedImage();
+      try {
+        finalImg = _exportCroppedImage();
+      } catch (imgErr) {
+        console.error('Erro ao exportar imagem:', imgErr);
+        alert('Não foi possível processar a imagem selecionada. A peça será salva sem foto — você pode editar depois e tentar novamente com outra foto.');
+        finalImg = (existingProduct && existingProduct.img) ? existingProduct.img : '';
+      }
     } else if (existingProduct && existingProduct.img) {
-      // Editando e mantendo a imagem anterior
       finalImg = existingProduct.img;
     }
-    // Se não tem imagem antiga e não carregou nova, fica vazio (mostra emoji)
 
     const product = {
       name:        name,
@@ -353,7 +356,6 @@ $('adminForm')?.addEventListener('submit', async e => {
 
     if (id) {
       product.id = id;
-      // Preserva metadados antigos
       if (existingProduct && existingProduct.createdAt) {
         product.createdAt = existingProduct.createdAt;
       }
@@ -362,7 +364,7 @@ $('adminForm')?.addEventListener('submit', async e => {
       product.createdAt = Date.now();
     }
 
-    DB.saveProduct(product);
+    await DB.saveProduct(product);
 
     // Reseta os estados de forma limpa
     $('adminForm').reset();
@@ -376,17 +378,17 @@ $('adminForm')?.addEventListener('submit', async e => {
     saveBtn.textContent = '✓ Salvo!';
     saveBtn.style.background = 'var(--green)';
     saveBtn.disabled = true;
-    
-    setTimeout(() => { 
-      saveBtn.textContent = orig; 
-      saveBtn.style.background = ''; 
+
+    setTimeout(() => {
+      saveBtn.textContent = orig;
+      saveBtn.style.background = '';
       saveBtn.disabled = false;
       isSubmittingForm = false;
     }, 1500);
 
   } catch (error) {
     console.error('Erro ao salvar produto:', error);
-    alert('Erro ao salvar. Verifique a imagem e tente novamente.');
+    alert('Erro ao salvar. Verifique sua conexão e tente novamente.');
     isSubmittingForm = false;
   }
 });
@@ -403,11 +405,14 @@ const cropState = {
   isNewImage: false
 };
 
-const CANVAS_SIZE = 400; 
+const CANVAS_SIZE = 400;
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
 function _loadImageIntoEditor(src) {
   const img = new Image();
-  img.crossOrigin = 'anonymous';
+  // ⚠️ NÃO definir img.crossOrigin aqui — para imagens locais (data: URL do
+  // FileReader) isso "contamina" o canvas e impede toDataURL() de funcionar,
+  // causando falha silenciosa ao salvar a foto.
   img.onload = () => {
     cropState.imageObj = img;
     cropState.zoom     = 1;
@@ -427,7 +432,11 @@ function _loadImageIntoEditor(src) {
 
     _drawCrop();
   };
-  img.onerror = () => console.log('Carregando imagem padrão ou emoji.');
+  img.onerror = () => {
+    console.error('Falha ao carregar imagem no editor.');
+    alert('Não foi possível carregar essa imagem. Tente outro arquivo (JPG ou PNG).');
+    _resetImageEditor();
+  };
   img.src = src;
 }
 
@@ -476,17 +485,33 @@ function _drawCrop() {
 
 function _exportCroppedImage() {
   const canvas = $('cropCanvas');
-  if (!canvas) return '';
+  if (!canvas || !cropState.imageObj) return '';
   return canvas.toDataURL('image/jpeg', 0.80);
 }
 
 $('pImgFile')?.addEventListener('change', function () {
   const file = this.files[0];
   if (!file) return;
-  if (!file.type.startsWith('image/')) { alert('Por favor, selecione um arquivo de imagem.'); return; }
+
+  if (!file.type.startsWith('image/')) {
+    alert('Por favor, selecione um arquivo de imagem (JPG, PNG, etc).');
+    this.value = '';
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    alert('Imagem muito grande (máximo 15MB). Escolha outra foto ou tire uma foto com menor resolução.');
+    this.value = '';
+    return;
+  }
+
   cropState.isNewImage = true;
   const reader = new FileReader();
   reader.onload = e => _loadImageIntoEditor(e.target.result);
+  reader.onerror = () => {
+    alert('Erro ao ler o arquivo selecionado. Tente novamente.');
+    _resetImageEditor();
+  };
   reader.readAsDataURL(file);
 });
 
@@ -603,7 +628,6 @@ function _syncSlidersFromState() {
   });
 
   function renderCursor() {
-    // Interpolação suave para o efeito elástico de "atraso fluído" da aura
     ringX += (mouseX - ringX) * 0.15;
     ringY += (mouseY - ringY) * 0.15;
     ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
@@ -611,9 +635,8 @@ function _syncSlidersFromState() {
   }
   requestAnimationFrame(renderCursor);
 
-  // Escuta hover em elementos clicáveis de forma dinâmica
   const clickables = 'a, button, [onclick], input, select, textarea, .product-card, .filter-btn, .product-img';
-  
+
   document.addEventListener('mouseover', e => {
     if (e.target.closest(clickables)) {
       ring.classList.add('hover');
@@ -628,87 +651,3 @@ function _syncSlidersFromState() {
     }
   });
 })();
-/* ═══════════════════════════════════════════════════════════════════════════
-   🛡️ ROTINA DE LIMPEZA AUTOMÁTICA DE DUPLICATAS - MELHORADA
-═══════════════════════════════════════════════════════════════════════════ */
-let isDuplicateCheckRunning = false;
-
-(function autoCleanDuplicates() {
-  if (typeof DB === 'undefined' || isDuplicateCheckRunning) return;
-  isDuplicateCheckRunning = true;
-  
-  setTimeout(() => {
-    try {
-      const products = DB.getProducts();
-      const seen = new Map();
-      const toDelete = [];
-
-      products.forEach(p => {
-        const key = p.name.trim().toLowerCase() + '|' + p.category;
-        
-        if (seen.has(key)) {
-          const existing = seen.get(key);
-          
-          // Mantém o que tem VERDADEIRA imagem (não vazia)
-          if (existing.img && existing.img.length > 50 && (!p.img || p.img.length <= 50)) {
-            toDelete.push(p.id);
-          } else if ((!existing.img || existing.img.length <= 50) && p.img && p.img.length > 50) {
-            toDelete.push(existing.id);
-            seen.set(key, p);
-          } else {
-            // Se ambos têm imagem ou nenhum tem, mantém o mais antigo (createdAt menor)
-            if (p.createdAt && existing.createdAt && p.createdAt < existing.createdAt) {
-              toDelete.push(existing.id);
-              seen.set(key, p);
-            } else {
-              toDelete.push(p.id);
-            }
-          }
-        } else {
-          seen.set(key, p);
-        }
-      });
-
-      // Remove duplicatas identificadas
-      if (toDelete.length > 0) {
-        toDelete.forEach(id => {
-          console.log(`Removendo duplicata: ${id}`);
-          DB.deleteProduct(id);
-        });
-        
-        setTimeout(() => {
-          if (typeof renderProducts === 'function') renderProducts(currentCat || 'todas');
-          if (typeof renderAdminList === 'function' && document.getElementById('adminPanel')?.classList.contains('open')) {
-            renderAdminList();
-          }
-          console.log(`✓ Limpeza: ${toDelete.length} duplicata(s) removida(s).`);
-        }, 500);
-      }
-    } catch (error) {
-      console.error('Erro na limpeza de duplicatas:', error);
-    } finally {
-      isDuplicateCheckRunning = false;
-    }
-  }, 1000);
-})();
-
-// ✅ FIX FINAL DUPLICAÇÃO
-function autoCleanDuplicates() {
-  if (typeof DB === 'undefined') return;
-
-  const products = DB.getProducts();
-  const seen = new Map();
-
-  products.forEach(p => {
-    const key = p.name.trim().toLowerCase() + "|" + p.category;
-
-    if (!seen.has(key)) {
-      seen.set(key, p);
-    }
-  });
-
-  renderProducts(currentCat);
-}
-
-// roda uma vez só
-setTimeout(autoCleanDuplicates, 1200);
